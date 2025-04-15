@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrusel Aleatorio - Oca Loka</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css">
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .carrusel-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .splide__slide img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 15px;
+      margin: 0 auto;
+    }
+
+    .spin-button {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background-color: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .spin-button:hover {
+      background-color: #e84118;
+    }
+  </style>
+</head>
+<body>
+  <div class="carrusel-container">
+    <h2>Carrusel Aleatorio</h2>
+    <div id="splide" class="splide">
+      <div class="splide__track">
+        <ul class="splide__list">
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/furbo.jpg" alt="Imagen 1"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/bolos.jpg" alt="Imagen 2"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/basket.jpg" alt="Imagen 3"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/dardos.jpg" alt="Imagen 4"></li>
+        </ul>
+      </div>
+    </div>
+    <button id="spinButton" class="spin-button">Girar</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const splide = new Splide('#splide', {
+        type: 'loop',
+        direction: 'ltr',
+        perPage: 1,
+        focus: 'center',
+        pagination: false,
+        arrows: false,
+        speed: 600,
+      });
+
+      splide.mount();
+
+      const totalSlides = document.querySelectorAll('.splide__slide').length;
+      let lastIndex = -1;
+
+      document.getElementById('spinButton').addEventListener('click', function () {
+        let newIndex;
+
+        do {
+          newIndex = Math.floor(Math.random() * totalSlides);
+        } while (newIndex === lastIndex);
+
+        lastIndex = newIndex;
+
+        // Simulación de giro con aceleración/deceleración
+        let count = 0;
+        const spins = 20 + Math.floor(Math.random() * 10);
+        let intervalTime = 80;
+
+        const interval = setInterval(() => {
+          splide.go('>');
+          count++;
+          if (count > spins) {
+            clearInterval(interval);
+            splide.go(newIndex);
+          }
+        }, intervalTime);
+      });
+    });
+  </script>
+</body>
+</html>
