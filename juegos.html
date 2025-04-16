@@ -62,7 +62,7 @@
       margin: 0 auto;
     }
 
-    .spin-button {
+    .spin-button, .play-button {
       margin-top: 2rem;
       padding: 1rem 2rem;
       font-size: 1.2rem;
@@ -74,9 +74,19 @@
       transition: background-color 0.3s, transform 0.2s;
     }
 
-    .spin-button:hover {
+    .spin-button:hover, .play-button:hover {
       background-color: #ff9f43;
       transform: scale(1.05);
+    }
+
+    #resultado {
+      margin-top: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    #playContainer {
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -84,10 +94,9 @@
   <header>
     <h1>Oca Loka</h1>
     <nav class="menu">
-      <a href="#">Inicio</a>
-      <a href="#">Juegos</a>
-      <a href="#">Ranking</a>
-      <a href="#">Contacto</a>
+      <a href="/home/gemartin/ocaloka/juegos.html">Juegos</a>
+      <a href="/home/gemartin/ocaloka/marcador.html">Marcador</a>
+      <a href="#">Subastas</a>
     </nav>
   </header>
 
@@ -96,14 +105,16 @@
     <div id="splide" class="splide">
       <div class="splide__track">
         <ul class="splide__list">
-          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/furbo.jpg" alt="Imagen 1"></li>
-          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/bolos.jpg" alt="Imagen 2"></li>
-          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/basket.jpg" alt="Imagen 3"></li>
-          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/dardos.jpg" alt="Imagen 4"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/furbo.jpg" alt="Fútbol"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/bolos.jpg" alt="Bolos"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/basket.jpg" alt="Basket"></li>
+          <li class="splide__slide"><img src="/home/gemartin/ocaloka/assets/imgs/dardos.jpg" alt="Dardos"></li>
         </ul>
       </div>
     </div>
     <button id="spinButton" class="spin-button">Girar</button>
+    <div id="resultado"></div>
+    <div id="playContainer"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
@@ -121,6 +132,8 @@
 
       splide.mount();
 
+      const names = ['Fútbol', 'Bolos', 'Basket', 'Dardos'];
+      const links = ['furbo.html', 'bolos.html', 'basket.html', 'dardos.html'];
       const weights = [40, 30, 20, 10];
 
       function getRandomWeightedIndex(weights) {
@@ -152,9 +165,32 @@
           if (count > spins) {
             clearInterval(interval);
             splide.go(newIndex);
+            mostrarResultado(newIndex);
+            document.getElementById('spinButton').style.display = 'none';
           }
         }, intervalTime);
       });
+
+      function mostrarResultado(index) {
+  const resultadoDiv = document.getElementById('resultado');
+  resultadoDiv.textContent = `¡Ha salido la prueba: ${names[index]}!`;
+
+  const playContainer = document.getElementById('playContainer');
+  
+  // Si es Fútbol o Dardos, mostrar "Jugar"
+  if (names[index] === 'Fútbol' || names[index] === 'Dardos') {
+    playContainer.innerHTML = `<a href="vidas.html"><button class="play-button">Jugar</button></a>`;//`<a href="${links[index]}"><button class="play-button">Jugar</button></a>`;
+  } else {
+    // Para el resto de pruebas, mostrar "Girar otra vez"
+    playContainer.innerHTML = `<button class="spin-button" onclick="girarOtraVez()">Girar otra vez</button>`;
+  }
+}
+
+function girarOtraVez() {
+  // Vuelve a girar el carrusel sin necesidad de recargar la página
+  document.getElementById('spinButton').click();
+}
+
     });
   </script>
 </body>

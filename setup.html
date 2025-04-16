@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración de Equipos</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #232526, #414345);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #feca57;
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    select, input[type="text"] {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .team-config {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      background-color: #feca57;
+      color: black;
+      padding: 0.75rem 2rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      margin-top: 2rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ffd26a;
+    }
+  </style>
+</head>
+<body>
+  <h1>Configuración Inicial de Equipos</h1>
+
+  <label for="teamCount">¿Cuántos equipos jugarán? (2 a 5)</label>
+  <select id="teamCount" onchange="generateTeamInputs()">
+    <option value="">Selecciona</option>
+    <option value="2">2 Equipos</option>
+    <option value="3">3 Equipos</option>
+    <option value="4">4 Equipos</option>
+    <option value="5">5 Equipos</option>
+  </select>
+
+  <form id="setupForm" onsubmit="return handleSubmit(event)">
+    <div id="teamsContainer"></div>
+    <button type="submit" id="startBtn" class="hidden">Comenzar</button>
+  </form>
+
+  <script>
+    const colors = ['amarillo', 'azul', 'naranja', 'verde', 'rojo'];
+    const colorHex = {
+      amarillo: '#ffff33',
+      azul: '#0099ff',
+      naranja: '#ff8000',
+      verde: '#00cc44',
+      rojo: '#ff0000'
+    };
+
+    function generateTeamInputs() {
+      const count = parseInt(document.getElementById('teamCount').value);
+      const container = document.getElementById('teamsContainer');
+      const startBtn = document.getElementById('startBtn');
+
+      container.innerHTML = '';
+      startBtn.classList.add('hidden');
+
+      if (isNaN(count) || count < 2 || count > 5) return;
+
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = 'team-config';
+        div.innerHTML = `
+          <label>Nombre del Equipo ${i + 1} (máx. 25 caracteres):
+            <input type="text" maxlength="25" required name="teamName${i}">
+          </label>
+          <label>Color:
+            <select required name="teamColor${i}">
+              <option value="">Selecciona un color</option>
+              ${colors.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
+            </select>
+          </label>
+        `;
+        container.appendChild(div);
+      }
+
+      startBtn.classList.remove('hidden');
+    }
+
+    function handleSubmit(event) {
+      event.preventDefault();
+
+      const count = parseInt(document.getElementById('teamCount').value);
+      const form = event.target;
+      const teamData = [];
+
+      const selectedColors = new Set();
+
+      for (let i = 0; i < count; i++) {
+        const name = form[`teamName${i}`].value.trim();
+        const color = form[`teamColor${i}`].value;
+
+        if (!name || !color) {
+          alert(`Por favor, completa todos los campos del equipo ${i + 1}`);
+          return false;
+        }
+
+        if (selectedColors.has(color)) {
+          alert(`El color "${color}" ya ha sido seleccionado. Por favor elige colores distintos.`);
+          return false;
+        }
+
+        selectedColors.add(color);
+
+        teamData.push({
+          name,
+          color,
+          hex: colorHex[color],
+          lives: 3
+        });
+      }
+
+      localStorage.setItem('teams', JSON.stringify(teamData));
+      window.location.href = "marcador.html"; // o index.html, según lo que quieras cargar
+    }
+  </script>
+</body>
+</html>

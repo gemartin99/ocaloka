@@ -4,15 +4,57 @@
   <meta charset="UTF-8">
   <title>Marcador de Partida</title>
   <style>
-    body {
+    html, body {
+      height: 100%;
       margin: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      height: 100vh;
-      font-family: sans-serif;
-      font-weight: bold;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
     }
+
+    header {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #feca57;
+    }
+
+    .menu {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .menu a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    .menu a:hover {
+      color: #feca57;
+    }
+
+    .container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
     .team {
       display: flex;
       flex-direction: column;
@@ -21,44 +63,36 @@
       font-size: 4em;
       color: black;
       cursor: pointer;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+      padding: 1rem;
     }
-    .aston { background: #00cc44; }
-    .jordan { background: #ffff33; }
-    .mclaren { background: #ff8000; }
-    .ferrari {
-      background: #ff0000;
-      color: white;
-      position: relative;
+
+    .team:hover {
+      transform: scale(1.02);
+      outline: 3px solid #feca57; /* Indicamos que el equipo está siendo seleccionado */
     }
+
     .team-name {
       font-size: 0.5em;
       margin-bottom: 10px;
-    }
-    .gear {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      font-size: 0.5em;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="team aston" onclick="increment('score1')">
-    <div class="team-name">Aston Martin</div>
-    <div id="score1">0</div>
-  </div>
-  <div class="team jordan" onclick="increment('score2')">
-    <div class="team-name">Jordan</div>
-    <div id="score2">0</div>
-  </div>
-  <div class="team mclaren" onclick="increment('score3')">
-    <div class="team-name">Mclaren</div>
-    <div id="score3">0</div>
-  </div>
-  <div class="team ferrari" onclick="increment('score4')">
-    <div class="team-name">Ferrari</div>
-    <div id="score4">0</div>
-    <div class="gear">⚙️</div>
+  <header>
+    <h1>Oca Loka</h1>
+    <nav class="menu">
+      <a href="/home/gemartin/ocaloka/juegos.html">Juegos</a>
+      <a href="/home/gemartin/ocaloka/marcador.html">Marcador</a>
+      <a href="#">Subastas</a>
+    </nav>
+  </header>
+
+  <div class="container" id="teamsContainer">
+    <!-- Equipos generados dinámicamente aquí -->
   </div>
 
   <script>
@@ -66,6 +100,59 @@
       const el = document.getElementById(id);
       el.textContent = parseInt(el.textContent) + 100;
     }
+
+    function decrement(id) {
+      const el = document.getElementById(id);
+      el.textContent = parseInt(el.textContent) - 100;
+    }
+
+    function handleKeydown(event) {
+      // Encontrar el equipo que está en hover
+      const hoveredTeam = document.querySelector('.team:hover');
+
+      if (!hoveredTeam) return;  // Si no hay equipo en hover, no hacer nada
+
+      const scoreId = hoveredTeam.querySelector('div[id^="score"]').id; // Extraemos el ID del marcador del equipo
+
+      if (event.key === 'ArrowUp') {
+        increment(scoreId); // Incrementa puntos
+      } else if (event.key === 'ArrowDown') {
+        decrement(scoreId); // Decrementa puntos
+      }
+    }
+
+    function loadTeams() {
+      const teamsContainer = document.getElementById('teamsContainer');
+      const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+
+      if (teams.length === 0) {
+        teamsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">No se ha configurado ningún equipo. <a href="setup.html" style="color:#feca57;">Haz clic aquí para configurarlos</a>.</p>';
+        return;
+      }
+
+      teams.forEach((team, index) => {
+        const div = document.createElement('div');
+        div.className = 'team';
+        div.style.backgroundColor = team.hex;
+
+        // Asociamos las funciones de incremento y decremento a los clics
+        div.setAttribute('onclick', `increment('score${index}')`);
+        div.setAttribute('oncontextmenu', `decrement('score${index}'); return false;`);
+        
+        // Establecemos el ID para cada marcador
+        div.innerHTML = `
+          <div class="team-name">${team.name}</div>
+          <div id="score${index}">0</div>
+        `;
+
+        teamsContainer.appendChild(div);
+      });
+
+      // Agregar el event listener para las teclas de flecha
+      window.addEventListener('keydown', handleKeydown);
+    }
+
+    loadTeams();
   </script>
 </body>
 </html>
