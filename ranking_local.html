@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados de la Partida</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f2027;
+      --bg-mid: #203a43;
+      --bg-light: #2c5364;
+      --accent: #feca57;
+      --accent-hover: rgba(254,202,87,0.8);
+      --text-light: #ffffff;
+      --text-dark: #1a1a1a;
+      --radius: 16px;
+      --shadow: 0 12px 24px rgba(0,0,0,0.6);
+      --transition: 0.3s ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, var(--bg-dark), var(--bg-mid), var(--bg-light));
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    header {
+      width: 100%;
+      max-width: 1200px;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      margin-top: 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    header img {
+      height: 60px;
+      width: auto;
+      margin-right: 1rem;
+    }
+
+    nav.menu {
+      display: flex;
+      gap: 1.5rem;
+    }
+  
+    nav.menu a {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      text-decoration: none;
+      position: relative;
+      padding: 0.3rem 0;
+      transition: color var(--transition);
+    }
+  
+    nav.menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width var(--transition);
+    }
+  
+    nav.menu a:hover {
+      color: var(--accent);
+    }
+  
+    nav.menu a:hover::after {
+      width: 100%;
+    }
+
+    .podium {
+      display: flex; justify-content: center; align-items: flex-end;
+      gap: 4rem; width: 100%; max-width: 1200px;
+      margin-top: 4rem;
+      margin-bottom: 2rem;
+    }
+    .podium-item {
+      position: relative;
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+      padding: 1rem; border-radius: var(--radius); box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,0.2);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .podium-item::before {
+      content: '';
+      position: absolute; top: -1rem; width: 80%; height: 0.5rem;
+      background: var(--accent);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .podium-item[data-pos="1"] { order: 2; transform: scale(1.2); height: 260px; }
+    .podium-item[data-pos="2"] { order: 1; transform: scale(1.1); height: 220px; }
+    .podium-item[data-pos="3"] { order: 3; transform: scale(1.05); height: 200px; }
+    .podium-item:hover { transform: translateY(-10px) scale(1.25); box-shadow: 0 16px 32px rgba(254,202,87,0.6); }
+    .pos-label {
+      position: absolute; top: 0.5rem; left: 0.5rem;
+      background: var(--accent);
+      color: var(--text-dark);
+      padding: 0.3rem 0.6rem;
+      border-radius: calc(var(--radius)/2);
+      font-size: 1.1rem; font-weight: 700;
+    }
+    .team-name { font-size: 1.1rem; font-weight: 600; text-transform: uppercase;
+      color: var(--text-light); margin-top: 2rem; text-align: center;
+      width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .score { font-size: 1.7rem; font-weight: bold; margin: 0.5rem 0; }
+    .global-rank { font-size: 1rem; background: var(--text-light);
+      color: var(--bg-dark); padding: 0.4rem 0.8rem; border-radius: 8px;
+      font-weight: 600;
+    }
+    .details {
+      margin-top: 2rem; width: 100%; max-width: 1000px;
+      display: flex; justify-content: space-around; gap: 1rem;
+    }
+    .detail-item {
+      flex: 1; background: rgba(0,0,0,0.6); padding: 1rem;
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .detail-item h2 { font-size: 1.2rem; margin-bottom: 0.3rem; color: #333333; }
+    .detail-item p { font-size: 1.2rem;color: #333333; }
+    button#globalBtn {
+      padding: 0.8rem 2rem; background: var(--accent);
+      color: var(--text-dark); font-weight: 600; font-size: 1rem;
+      border: none; border-radius: var(--radius); box-shadow: var(--shadow);
+      cursor: pointer; transition: background var(--transition), transform var(--transition);
+      margin-top: auto;
+    }
+    button#globalBtn:hover { background: var(--accent-hover); transform: scale(1.05); }
+  </style>
+</head>
+<body>
+    <header>
+        <img src="assets/imgs/logo.png" alt="Logo">
+        <h1>Ranking Partida</h1>
+        <nav class="menu">
+          <a href="juegos.html"><span>Juegos</span></a>
+          <a href="marcador.html"><span>Marcador</span></a>
+          <a href="subastas.html"><span>Subastas</span></a>
+        </nav>
+      </header>
+
+  <div class="podium" id="localPodium"></div>
+  <div class="details" id="positionDetails"></div>
+  <button id="globalBtn">Ver Ranking Global</button>
+
+  <script>
+    const teams = JSON.parse(localStorage.getItem('teams')||'[]');
+    const rawGlobal = JSON.parse(localStorage.getItem('globalRanking')||'[]');
+    const computeGlobalPosition = score => rawGlobal.filter(e=>e.score>score).length + 1;
+    const sorted = [...teams].sort((a,b)=>b.score-a.score);
+    const pod = document.getElementById('localPodium');
+    sorted.slice(0,Math.min(3,sorted.length)).forEach((t,i)=>{
+      const d=document.createElement('div'); d.className='podium-item'; d.dataset.pos=i+1;
+      const gpos=computeGlobalPosition(t.score);
+      d.style.backgroundColor=t.hex;
+      d.innerHTML=`<div class="pos-label">${i+1}º</div>
+                   <div class="team-name">${t.name}</div>
+                   <div class="score">${t.score} pts</div>
+                   <div class="global-rank">Global: ${gpos}º</div>`;
+      pod.appendChild(d);
+    });
+    const det=document.getElementById('positionDetails');
+    sorted.slice(3,5).forEach((t,i)=>{
+      const it=document.createElement('div'); it.className='detail-item'; it.style.backgroundColor=t.hex;
+      const gp=computeGlobalPosition(t.score);
+      it.innerHTML=`<h2>${i+4}º - ${t.name}</h2><p>${t.score} pts</p><p>Global: ${gp}º</p>`;
+      det.appendChild(it);
+    });
+    document.getElementById('globalBtn').onclick=()=>location.href='ranking.html';
+  </script>
+</body>
+</html>
