@@ -158,6 +158,36 @@ button#endGameBtn:hover {
   transform: scale(1.03);
 }
 
+  .team.selected {
+    outline: 4px solid #fff;
+    box-shadow: 0 0 15px #fff;
+  }
+
+  button {
+    margin: 5px;
+  }
+
+  .sad-emoji {
+    position: fixed;
+    font-size: 2rem;
+    animation: floatDown 2s ease-in forwards;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes floatDown {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(100px); }
+  }
+
+  .oca-anim {
+    animation: slideZipline 2s linear forwards;
+  }
+
+  @keyframes slideZipline {
+    0% { left: -100px; }
+    100% { left: 100vw; }
+  }
 
   </style>
   
@@ -173,102 +203,325 @@ button#endGameBtn:hover {
     </nav>
   </header>
 
-  <div class="container" id="teamsContainer">
-    <!-- Equipos generados aqui -->
+  <div class="container" id="teamsContainer"></div>
+
+  <div style="margin: 10px;">
+    <button id="x2Btn" style="display: none;">x2</button>
+    <button id="deathBtn" style="display: none;">💀 Muerte</button>
+    <button id="div2Btn" style="display: none;">%2</button>
   </div>
 
   <button id="endGameBtn">Finalizar Partida</button>
 
-  <script>
-    function increment(id) {
-      const el = document.getElementById(id);
-      el.textContent = parseInt(el.textContent) + 100;
-      saveScores();
-    }
-  
-    function decrement(id) {
-      const el = document.getElementById(id);
-      el.textContent = parseInt(el.textContent) - 100;
-      saveScores();
-    }
-  
-    function handleKeydown(event) {
-      const hoveredTeam = document.querySelector('.team:hover');
-  
-      if (!hoveredTeam) return;
-      const scoreId = hoveredTeam.querySelector('div[id^="score"]').id;
-  
-      if (event.key === 'ArrowUp') {
-        increment(scoreId);
-      } else if (event.key === 'ArrowDown') {
-        decrement(scoreId);
-      }
-    }
+  <!-- Confetti y emojis tristes -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    function saveScores() {
-      const teamsContainer = document.getElementById('teamsContainer');
-      const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+  <img id="ziplineOca" src="assets/imgs/oca.png" alt="Oca en tirolina">
+<div id="ziplineRope"></div>
 
-      teams.forEach((team, index) => {
-        const scoreElement = document.getElementById(`score${index}`);
-        team.score = parseInt(scoreElement.textContent);
-      });
-  
-      localStorage.setItem('teams', JSON.stringify(teams));
-    }
-  
-    function loadTeams() {
-  const teamsContainer = document.getElementById('teamsContainer');
-  const teams = JSON.parse(localStorage.getItem('teams') || '[]');
-
-  if (teams.length === 0) {
-    teamsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">No se ha configurado ningún equipo. <a href="setup.html" style="color:#feca57;">Haz clic aquí para configurarlos</a>.</p>';
-    return;
+ 
+<style>
+  #ziplineOca {
+    position: fixed;
+    top: -300px;
+    right: -300px;
+    width: 300px;
+    transform: rotate(-45deg);
+    opacity: 0;
+    z-index: 9999;
+    pointer-events: none;
   }
 
-  teams.forEach((team, index) => {
-    const div = document.createElement('div');
-    div.className = 'team';
-    div.style.backgroundColor = team.hex;
+  #ziplineRope {
+    position: fixed;
+    width: 4px;
+    background-color: #444;
+    transform-origin: top left;
+    z-index: 9998;
+    opacity: 0;
+  }
 
-    div.setAttribute('onclick', `increment('score${index}')`);
-    div.setAttribute('oncontextmenu', `decrement('score${index}'); return false;`); 
+  @keyframes ziplineReal {
+    0% {
+      top: -300px;
+      right: -300px;
+      transform: rotate(-45deg) scale(1);
+      opacity: 0;
+    }
 
-    div.innerHTML = `
-      <div class="team-name">${team.name}</div>
-      <div id="score${index}">${team.score || 0}</div>
-    `;
+    50% {
+      opacity: 1;
+    }
 
-    teamsContainer.appendChild(div);
-  });
+    80% {
+      transform: rotate(-10deg) scale(1.4);
+    }
 
-  window.addEventListener('keydown', handleKeydown);
+    100% {
+      top: 50%;
+      right: 50%;
+      transform: rotate(0deg) scale(1.6);
+      opacity: 1;
+    }
+  }
+
+  @keyframes collisionShake {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    25% { transform: translate(-48%, -52%) rotate(3deg); }
+    50% { transform: translate(-52%, -48%) rotate(-3deg); }
+    75% { transform: translate(-49%, -51%) rotate(2deg); }
+    100% { transform: translate(-50%, -50%) rotate(0deg); }
+  }
+
+  .zipline-animate {
+    animation: ziplineReal 2s ease-out forwards;
+  }
+
+  .zipline-shake {
+    position: fixed;
+    top: 50%;
+    right: 50%;
+    transform: translate(-50%, -50%);
+    animation: collisionShake 0.5s ease-in-out;
+  }
+
+  .rope-visible {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  button#x2Btn,
+  button#div2Btn,
+button#deathBtn {
+  background: var(--accent);
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  margin: 0.5rem;
 }
 
 
-function saveGlobalRanking() {
-  const teams = JSON.parse(localStorage.getItem('teams') || '[]');
-  const ranking = JSON.parse(localStorage.getItem('globalRanking') || '[]');
 
-  teams.forEach(team => {
-    ranking.push({
-      name: team.name,
-      score: team.score,
-      color: team.hex
+</style>
+
+<script>
+  let selectedTeamIndex = null;
+
+  function increment(id) {
+    const el = document.getElementById(id);
+    el.textContent = parseInt(el.textContent) + 100;
+    saveScores();
+  }
+
+  function decrement(id) {
+    const el = document.getElementById(id);
+    el.textContent = parseInt(el.textContent) - 100;
+    saveScores();
+  }
+
+  function multiplyScoreBy2(index) {
+    const el = document.getElementById(`score${index}`);
+    const current = parseInt(el.textContent);
+    el.textContent = current * 2;
+    saveScores();
+
+    if (current >= 0) {
+      confetti();
+    } else {
+      showSadEmojis();
+    }
+
+    deselectTeam();
+  }
+
+  function splitScoreBy2(index) {
+    const el = document.getElementById(`score${index}`);
+    const current = parseInt(el.textContent);
+    el.textContent = current / 2;
+    saveScores();
+
+    if (current < 0) {
+      confetti();
+    } else {
+      showSadEmojis();
+    }
+
+    deselectTeam();
+  }
+
+  function resetScore(index) {
+    const el = document.getElementById(`score${index}`);
+    el.textContent = 0;
+    saveScores();
+    showZiplineOca();
+
+    deselectTeam();
+  }
+
+  function handleKeydown(event) {
+    const hoveredTeam = document.querySelector('.team:hover');
+    if (!hoveredTeam) return;
+    const scoreId = hoveredTeam.querySelector('div[id^="score"]').id;
+    if (event.key === 'ArrowUp') {
+      increment(scoreId);
+    } else if (event.key === 'ArrowDown') {
+      decrement(scoreId);
+    }
+  }
+
+  function saveScores() {
+    const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+    teams.forEach((team, index) => {
+      const scoreElement = document.getElementById(`score${index}`);
+      team.score = parseInt(scoreElement.textContent);
     });
-  });
+    localStorage.setItem('teams', JSON.stringify(teams));
+  }
 
-  ranking.sort((a, b) => b.score - a.score);
+  function loadTeams() {
+    const teamsContainer = document.getElementById('teamsContainer');
+    const teams = JSON.parse(localStorage.getItem('teams') || '[]');
 
-  localStorage.setItem('globalRanking', JSON.stringify(ranking));
-  alert('Partida finalizada y guardada en el ranking global.');
-  
-  window.location.href = 'ranking_local.html';
-}
+    if (teams.length === 0) {
+      teamsContainer.innerHTML = '<p style="grid-column: 1 / -1; text-align:center;">No se ha configurado ningún equipo. <a href="setup.html" style="color:#feca57;">Haz clic aquí para configurarlos</a>.</p>';
+      return;
+    }
+
+    teams.forEach((team, index) => {
+      const div = document.createElement('div');
+      div.className = 'team';
+      div.style.backgroundColor = team.hex;
+
+      div.addEventListener('click', () => {
+        selectedTeamIndex = index;
+        document.querySelectorAll('.team').forEach(t => t.classList.remove('selected'));
+        div.classList.add('selected');
+        showActionButtons();
+      });
+
+      div.setAttribute('oncontextmenu', `decrement('score${index}'); return false;`);
+
+      div.innerHTML = `
+        <div class="team-name">${team.name}</div>
+        <div id="score${index}">${team.score || 0}</div>
+      `;
+
+      teamsContainer.appendChild(div);
+    });
+
+    window.addEventListener('keydown', handleKeydown);
+  }
+
+  function showActionButtons() {
+    document.getElementById('x2Btn').style.display = 'inline-block';
+    document.getElementById('deathBtn').style.display = 'inline-block';
+  }
+
+  function hideActionButtons() {
+    document.getElementById('x2Btn').style.display = 'none';
+    document.getElementById('deathBtn').style.display = 'none';
+  }
+
+  function showActionButtons() {
+    document.getElementById('div2Btn').style.display = 'inline-block';
+    document.getElementById('deathBtn').style.display = 'inline-block';
+  }
+
+  function hideActionButtons() {
+    document.getElementById('div2Btn').style.display = 'none';
+    document.getElementById('deathBtn').style.display = 'none';
+  }
+
+  function deselectTeam() {
+    document.querySelectorAll('.team').forEach(t => t.classList.remove('selected'));
+    selectedTeamIndex = null;
+    hideActionButtons();
+  }
+
+  function showZiplineOca() {
+    const oca = document.getElementById('ziplineOca');
+    const rope = document.getElementById('ziplineRope');
+    const header = document.querySelector('header');
+
+    oca.classList.remove('zipline-animate', 'zipline-shake');
+    oca.style.display = 'block';
+    oca.style.top = '-300px';
+    oca.style.right = '-300px';
+
+    const headerRect = header.getBoundingClientRect();
+    const startX = headerRect.left + headerRect.width / 2;
+    const startY = headerRect.bottom;
+    const endX = window.innerWidth - 300;
+    const endY = 0;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    rope.style.left = `${startX}px`;
+    rope.style.top = `${startY}px`;
+    rope.style.height = `${length}px`;
+    rope.style.transform = `rotate(${angle}deg)`;
+    rope.classList.add('rope-visible');
+
+    void oca.offsetWidth;
+    oca.classList.add('zipline-animate');
+
+    setTimeout(() => {
+      oca.classList.remove('zipline-animate');
+      oca.classList.add('zipline-shake');
+      rope.classList.remove('rope-visible');
+    }, 2000);
+
+    setTimeout(() => {
+      oca.style.display = 'none';
+      oca.classList.remove('zipline-shake');
+    }, 3000);
+  }
+
+  function showSadEmojis() {
+    for (let i = 0; i < 30; i++) {
+      const emoji = document.createElement('div');
+      emoji.className = 'sad-emoji';
+      emoji.style.left = `${Math.random() * 100}vw`;
+      emoji.style.top = `${Math.random() * 30}vh`;
+      emoji.textContent = Math.random() > 0.5 ? '💩' : '🤡';
+      document.body.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 2000);
+    }
+  }
+
+  function saveGlobalRanking() {
+    const teams = JSON.parse(localStorage.getItem('teams') || '[]');
+    const ranking = JSON.parse(localStorage.getItem('globalRanking') || '[]');
+    teams.forEach(team => {
+      ranking.push({ name: team.name, score: team.score, color: team.hex });
+    });
+    ranking.sort((a, b) => b.score - a.score);
+    localStorage.setItem('globalRanking', JSON.stringify(ranking));
+    alert('Partida finalizada y guardada en el ranking global.');
+    window.location.href = 'ranking_local.html';
+  }
+
   document.getElementById('endGameBtn').addEventListener('click', saveGlobalRanking);
+  document.getElementById('x2Btn').addEventListener('click', () => {
+    if (selectedTeamIndex !== null) multiplyScoreBy2(selectedTeamIndex);
+  });
+  document.getElementById('deathBtn').addEventListener('click', () => {
+    if (selectedTeamIndex !== null) resetScore(selectedTeamIndex);
+  });
+  document.getElementById('div2Btn').addEventListener('click', () => {
+    if (selectedTeamIndex !== null) splitScoreBy2(selectedTeamIndex);
+  });
+  loadTeams();
+</script>
 
-    loadTeams();
-  </script>
-  
 </body>
+
 </html>
