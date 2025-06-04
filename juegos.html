@@ -183,6 +183,7 @@
     <div id="splide" class="splide">
       <div class="splide__track">
         <ul class="splide__list">
+          <li class="splide__slide"><img src="assets/imgs/random.png" alt="Random"></li>
           <li class="splide__slide"><img src="assets/imgs/sombreros.png" alt="Sombreros"></li>
           <li class="splide__slide"><img src="assets/imgs/duelo_cartas.png" alt="Duelo de cartas"></li>
           <li class="splide__slide"><img src="assets/imgs/adormir.png" alt="A dormir"></li>
@@ -207,6 +208,7 @@
           <li class="splide__slide"><img src="assets/imgs/desatascadores.png" alt="Desatascadores"></li>
           <li class="splide__slide"><img src="assets/imgs/rocodromo.png" alt="Rocodromo"></li>
           <li class="splide__slide"><img src="assets/imgs/escobar.png" alt="Escobar"></li>
+          <li class="splide__slide"><img src="assets/imgs/campana.png" alt="Campana"></li>
         </ul>
       </div>
     </div>
@@ -224,10 +226,10 @@
     focus: 'center',
     pagination: false,
     arrows: false,
-    speed: 600
+    speed: 700
   });
   splide.mount();
-  const allTests = ['Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas', 'Tragabolas', 'Basket', 'Carrusel', 'Desatascadores', 'Rocodromo', 'Escobar'];
+  const allTests = ['Random','Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas', 'Tragabolas', 'Basket', 'Carrusel', 'Desatascadores', 'Rocodromo', 'Escobar', 'Campana'];
   let pruebas = JSON.parse(localStorage.getItem('pruebasEnCola')) || [];
   let usarCola = false;
   let siguientePrueba = null;
@@ -314,7 +316,7 @@ function mostrarResultadoPorNombre(nombrePrueba) {
 }
 
 });
-
+  
   </script>
 </body>
 </html>

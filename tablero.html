@@ -1,0 +1,92 @@
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tablero de la Oca</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tablero {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+      padding: 20px;
+    }
+
+    .casilla {
+      background: #222;
+      border: 2px solid #444;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      border-radius: 6px;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    .casilla.especial {
+      background-color: #333;
+      border: 2px solid gold;
+    }
+
+    .casilla.seleccionada {
+      animation: highlight 0.5s ease infinite alternate;
+      background-color: limegreen !important;
+      color: black;
+    }
+
+    @keyframes highlight {
+      from { transform: scale(1); }
+      to { transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; padding-top: 20px;">Tablero del Juego de la Oca</h1>
+  <div class="tablero" id="tablero"></div>
+
+  <script>
+    const especiales = [1, 6, 12, 19, 26, 31, 42, 52, 53, 63];
+    const totalCasillas = 63;
+    const tablero = document.getElementById('tablero');
+
+    // Crear las casillas
+    for (let i = 1; i <= totalCasillas; i++) {
+      const casilla = document.createElement('div');
+      casilla.classList.add('casilla');
+      casilla.textContent = i;
+      if (especiales.includes(i)) casilla.classList.add('especial');
+      tablero.appendChild(casilla);
+    }
+
+    const todasCasillas = Array.from(document.querySelectorAll('.casilla'));
+    const seleccionables = todasCasillas.filter(c => !especiales.includes(parseInt(c.textContent)));
+
+    let actual = 0;
+    function animarSeleccion() {
+      let interval = setInterval(() => {
+        todasCasillas.forEach(c => c.classList.remove('seleccionada'));
+        todasCasillas[actual].classList.add('seleccionada');
+        actual = (actual + 1) % todasCasillas.length;
+      }, 50);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        todasCasillas.forEach(c => c.classList.remove('seleccionada'));
+        const elegida = seleccionables[Math.floor(Math.random() * seleccionables.length)];
+        elegida.classList.add('seleccionada');
+      }, 3000);
+    }
+
+    animarSeleccion();
+  </script>
+</body>
+</html>
