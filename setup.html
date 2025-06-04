@@ -74,10 +74,17 @@
     <option value="5">5 Equipos</option>
   </select>
 
+  <h2>Cola de Pruebas (opcional)</h2>
+
+<label for="testCount">Número de pruebas en cola:</label>
+<input type="number" id="testCount" min="1" max="20" value="0" onchange="generateTestInputs()">
+
+<div id="testQueueContainer"></div>
+
   <form id="setupForm" onsubmit="return handleSubmit(event)">
     <div id="teamsContainer"></div>
     <button type="submit" id="startBtn" class="hidden">Comenzar</button>
-  </form>
+  </form> 
 
   <script>
     const colors = ['amarillo', 'azul', 'naranja', 'verde', 'rojo'];
@@ -119,42 +126,91 @@
       startBtn.classList.remove('hidden');
     }
 
-    function handleSubmit(event) {
-      event.preventDefault();
+    const allTests = [
+    'Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas',
+    'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro',
+    'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos',
+    'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas'
+  ];
 
-      const count = parseInt(document.getElementById('teamCount').value);
-      const form = event.target;
-      const teamData = [];
+  function generateTestInputs() {
+    const count = parseInt(document.getElementById('testCount').value);
+    const container = document.getElementById('testQueueContainer');
 
-      const selectedColors = new Set();
+    container.innerHTML = '';
 
-      for (let i = 0; i < count; i++) {
-        const name = form[`teamName${i}`].value.trim();
-        const color = form[`teamColor${i}`].value;
+    if (isNaN(count) || count < 1 || count > 20) return;
 
-        if (!name || !color) {
-          alert(`Por favor, completa todos los campos del equipo ${i + 1}`);
-          return false;
-        }
+    for (let i = 0; i < count; i++) {
+      const div = document.createElement('div');
+      div.className = 'test-config';
+      div.innerHTML = `
+        <label>Prueba ${i + 1}:
+          <select name="test${i}" required>
+            <option value="">Selecciona una prueba</option>
+            ${allTests.map(t => `<option value="${t}">${t}</option>`).join('')}
+          </select>
+        </label>
+      `;
+      container.appendChild(div);
+    }
+  }
 
-        if (selectedColors.has(color)) {
-          alert(`El color "${color}" ya ha sido seleccionado. Por favor elige colores distintos.`);
-          return false;
-        }
+  function handleSubmit(event) {
+    event.preventDefault();
 
-        selectedColors.add(color);
+    const count = parseInt(document.getElementById('teamCount').value);
+    const form = event.target;
+    const teamData = [];
 
-        teamData.push({
-          name,
-          color,
-          hex: colorHex[color],
-          lives: 3
-        });
+    const selectedColors = new Set();
+
+    for (let i = 0; i < count; i++) {
+      const name = form[`teamName${i}`].value.trim();
+      const color = form[`teamColor${i}`].value;
+
+      if (!name || !color) {
+        alert(`Por favor, completa todos los campos del equipo ${i + 1}`);
+        return false;
       }
 
-      localStorage.setItem('teams', JSON.stringify(teamData));
-      window.location.href = "marcador.html";
+      if (selectedColors.has(color)) {
+        alert(`El color "${color}" ya ha sido seleccionado. Por favor elige colores distintos.`);
+        return false;
+      }
+
+      selectedColors.add(color);
+
+      teamData.push({
+        name,
+        color,
+        hex: colorHex[color],
+        lives: 3
+      });
     }
+
+    localStorage.setItem('teams', JSON.stringify(teamData));
+
+    // Guardar las pruebas en cola si hay
+    const testCount = parseInt(document.getElementById('testCount').value);
+    if (!isNaN(testCount) && testCount > 0) {
+      const queue = [];
+      for (let i = 0; i < testCount; i++) {
+        const testSelect = document.querySelector(`[name="test${i}"]`);
+        const value = testSelect?.value;
+        if (!value) {
+          alert(`Selecciona una prueba válida para la prueba ${i + 1}`);
+          return false;
+        }
+        queue.push(value);
+      }
+      localStorage.setItem('pruebasEnCola', JSON.stringify(queue));
+    } else {
+      localStorage.removeItem('pruebasEnCola');
+    }
+
+    window.location.href = "marcador.html";
+  }
   </script>
 </body>
 </html>

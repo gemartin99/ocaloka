@@ -211,34 +211,120 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () 
-    {
-      const splide = new Splide('#splide', { type: 'loop', perPage: 1, focus: 'center', pagination: false, arrows: false, speed: 600 });
-      splide.mount();
+    document.addEventListener('DOMContentLoaded', function () {
+  const splide = new Splide('#splide', {
+    type: 'loop',
+    perPage: 1,
+    focus: 'center',
+    pagination: false,
+    arrows: false,
+    speed: 600
+  });
+  splide.mount();
 
-      const names = ['Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas'];
-      const weights = [20, 20, 20, 15, 5, 15, 12, 12, 5, 15, 5, 15, 3, 15, 20, 1, 1, 5];
-      function getRandomWeightedIndex(w) { const total = w.reduce((a,b)=>a+b,0); let r=Math.random()*total, sum=0; for(let i=0;i<w.length;i++){ sum+=w[i]; if(r<sum) return i; } }
+  // Lista completa de pruebas (nombre y peso solo si se quiere)
+  const allTests = ['Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas'];
 
-      let lastIndex = -1;
-      document.getElementById('spinButton').addEventListener('click', function(){
-        let newIdx; do { newIdx=getRandomWeightedIndex(weights); } while(newIdx===lastIndex);
-        lastIndex=newIdx;
-        let count=0, spins=20+Math.floor(Math.random()*10);
-        const interval=setInterval(()=>{ splide.go('>'); if(++count>spins){ clearInterval(interval); splide.go(newIdx); showResult(newIdx); this.style.display='none'; } }, 80);
-      });
+  // Obtenemos la cola (array con nombres)
+  let pruebas = JSON.parse(localStorage.getItem('pruebasEnCola')) || [];
 
-      function showResult(i)
-      {
-        document.getElementById('resultado').textContent = `Ha tocado... ${names[i]}!`;
-        const ct = document.getElementById('playContainer');
-        if (['Sombreros','Sopla cartas'].includes(names[i])) {
-          ct.innerHTML = '<a href="vidas.html" class="play-button"><span>Jugar</span></a>';
-        } else {
-          ct.innerHTML = '<button class="spin-button" onclick="document.getElementById(\'spinButton\').click()"><span>Girar otra vez</span></button>';
-        }
+  // Variable para saber si usamos cola (y la siguiente prueba a jugar)
+  let usarCola = false;
+  let siguientePrueba = null;
+
+  if (pruebas.length > 0) {
+    usarCola = true;
+    siguientePrueba = pruebas[0]; // La siguiente prueba que tiene que salir
+  } else {
+    // Si no hay cola, usamos la lista completa
+    pruebas = allTests.slice();
+  }
+
+  const spinBtn = document.getElementById('spinButton');
+  let lastIndex = -1;
+
+  spinBtn.addEventListener('click', function () {
+  if (pruebas.length === 0) {
+    alert('No quedan más pruebas en cola.');
+    spinBtn.style.display = 'none';
+    return;
+  }
+
+  if (usarCola) {
+    // Ojo: targetIndex es el índice en ALLTESTS, no en la cola
+    let targetIndex = allTests.indexOf(siguientePrueba);
+    if (targetIndex === -1) {
+      alert('Error: la prueba en cola no está en la lista completa.');
+      return;
+    }
+
+    let count = 0;
+    const spins = 20 + Math.floor(Math.random() * 10);
+    const interval = setInterval(() => {
+      splide.go('>');
+      count++;
+      if (count > spins) {
+        clearInterval(interval);
+        const realIndex = splide.Components.Controller.toIndex(targetIndex);
+        splide.go(realIndex);
+
+        // Para mostrar resultado, mostramos el nombre correcto
+        mostrarResultadoPorNombre(siguientePrueba);
+
+        spinBtn.style.display = 'none';
       }
-    });
+    }, 80);
+
+  } else {
+    // Cuando no hay cola, el índice y la lista coinciden
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * pruebas.length);
+    } while (newIndex === lastIndex && pruebas.length > 1);
+    lastIndex = newIndex;
+
+    let count = 0, spins = 20 + Math.floor(Math.random() * 10);
+    const interval = setInterval(() => {
+      splide.go('>');
+      if (++count > spins) {
+        clearInterval(interval);
+        const realIndex = splide.Components.Controller.toIndex(newIndex);
+        splide.go(realIndex);
+        mostrarResultado(newIndex);
+        spinBtn.style.display = 'none';
+      }
+    }, 80);
+  }
+});
+
+// Nueva función para mostrar resultado por nombre (cuando usamos cola)
+function mostrarResultadoPorNombre(nombrePrueba) {
+  const resultadoDiv = document.getElementById('resultado');
+  const ct = document.getElementById('playContainer');
+
+  if (['Sombreros', 'Sopla cartas'].includes(nombrePrueba)) {
+    ct.innerHTML = '<a href="vidas.html" class="play-button"><span>Jugar</span></a>';
+  } else {
+    ct.innerHTML = '<button class="spin-button" onclick="document.getElementById(\'spinButton\').click()"><span>Girar otra vez</span></button>';
+  }
+
+  if (usarCola) {
+    // Quitamos la prueba ya usada de la cola y guardamos
+    pruebas.shift();
+    localStorage.setItem('pruebasEnCola', JSON.stringify(pruebas));
+
+    if (pruebas.length === 0) {
+      // Cuando se acabe la cola, pasamos a lista completa
+      usarCola = false;
+      pruebas = allTests.slice();
+    } else {
+      siguientePrueba = pruebas[0]; // Actualizamos la siguiente prueba
+    }
+  }
+}
+
+});
+
   </script>
 </body>
 </html>
