@@ -206,10 +206,11 @@ button#endGameBtn:hover {
   <div class="container" id="teamsContainer"></div>
 
   <div style="margin: 10px;">
-    <button id="x2Btn" style="display: none;">x2</button>
-    <button id="deathBtn" style="display: none;">💀 Muerte</button>
-    <button id="div2Btn" style="display: none;">%2</button>
-  </div>
+  <button id="x2Btn" style="display: none;">x2</button>
+  <button id="deathBtn" style="display: none;">💀 Muerte</button>
+  <button id="div2Btn" style="display: none;">%2</button>
+</div>
+
 
   <button id="endGameBtn">Finalizar Partida</button>
 
@@ -325,20 +326,14 @@ button#deathBtn {
     saveScores();
   }
 
-  function multiplyScoreBy2(index) {
-    const el = document.getElementById(`score${index}`);
-    const current = parseInt(el.textContent);
-    el.textContent = current * 2;
-    saveScores();
-
-    if (current >= 0) {
-      confetti();
-    } else {
-      showSadEmojis();
-    }
-
-    deselectTeam();
-  }
+  document.getElementById("x2Btn").addEventListener("click", () => {
+      if (selectedTeamIndex !== null) {
+        const scoreEl = document.getElementById("score" + selectedTeamIndex);
+        let score = parseInt(scoreEl.textContent, 10);
+        score *= 2;
+        scoreEl.textContent = score;
+      }
+    });
 
   function splitScoreBy2(index) {
     const el = document.getElementById(`score${index}`);
@@ -350,6 +345,21 @@ button#deathBtn {
       confetti();
     } else {
       showSadEmojis();
+    }
+
+    deselectTeam();
+  }
+
+  function multiplyScoreBy2(index) {
+    const el = document.getElementById(`score${index}`);
+    const current = parseInt(el.textContent);
+    el.textContent = current * 1;
+    saveScores();
+
+    if (current < 0) {
+      showSadEmojis();
+    } else {
+      confetti();
     }
 
     deselectTeam();
@@ -399,11 +409,20 @@ button#deathBtn {
       div.style.backgroundColor = team.hex;
 
       div.addEventListener('click', () => {
-        selectedTeamIndex = index;
-        document.querySelectorAll('.team').forEach(t => t.classList.remove('selected'));
-        div.classList.add('selected');
-        showActionButtons();
-      });
+  if (selectedTeamIndex === index) {
+    // Si ya estaba seleccionado, deseleccionamos
+    selectedTeamIndex = null;
+    div.classList.remove('selected');
+    hideActionButtons();  // Si quieres ocultar botones cuando no hay selección
+  } else {
+    // Seleccionamos el nuevo equipo
+    selectedTeamIndex = index;
+    document.querySelectorAll('.team').forEach(t => t.classList.remove('selected'));
+    div.classList.add('selected');
+    showActionButtons();
+  }
+});
+
 
       div.setAttribute('oncontextmenu', `decrement('score${index}'); return false;`);
 
@@ -419,23 +438,15 @@ button#deathBtn {
   }
 
   function showActionButtons() {
-    document.getElementById('x2Btn').style.display = 'inline-block';
-    document.getElementById('deathBtn').style.display = 'inline-block';
-  }
-
-  function hideActionButtons() {
-    document.getElementById('x2Btn').style.display = 'none';
-    document.getElementById('deathBtn').style.display = 'none';
-  }
-
-  function showActionButtons() {
     document.getElementById('div2Btn').style.display = 'inline-block';
     document.getElementById('deathBtn').style.display = 'inline-block';
+    document.getElementById('x2Btn').style.display = 'inline-block';
   }
 
   function hideActionButtons() {
     document.getElementById('div2Btn').style.display = 'none';
     document.getElementById('deathBtn').style.display = 'none';
+    document.getElementById('x2Btn').style.display = 'none';
   }
 
   function deselectTeam() {
@@ -491,7 +502,7 @@ button#deathBtn {
       emoji.className = 'sad-emoji';
       emoji.style.left = `${Math.random() * 100}vw`;
       emoji.style.top = `${Math.random() * 30}vh`;
-      emoji.textContent = Math.random() > 0.5 ? '💩' : '🤡';
+      emoji.textContent = Math.random() > 0.5 ? '👎🏼' : '📉 ';
       document.body.appendChild(emoji);
       setTimeout(() => emoji.remove(), 2000);
     }
