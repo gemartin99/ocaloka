@@ -214,7 +214,6 @@ button#endGameBtn:hover {
 
   <button id="endGameBtn">Finalizar Partida</button>
 
-  <!-- Confetti y emojis tristes -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <img id="ziplineOca" src="assets/imgs/oca.png" alt="Oca en tirolina">
@@ -410,12 +409,10 @@ button#deathBtn {
 
       div.addEventListener('click', () => {
   if (selectedTeamIndex === index) {
-    // Si ya estaba seleccionado, deseleccionamos
     selectedTeamIndex = null;
     div.classList.remove('selected');
-    hideActionButtons();  // Si quieres ocultar botones cuando no hay selección
+    hideActionButtons();
   } else {
-    // Seleccionamos el nuevo equipo
     selectedTeamIndex = index;
     document.querySelectorAll('.team').forEach(t => t.classList.remove('selected'));
     div.classList.add('selected');
@@ -428,7 +425,7 @@ button#deathBtn {
 
       div.innerHTML = `
         <div class="team-name">${team.name}</div>
-        <div id="score${index}">${team.score || 0}</div>
+        <div id="score${index}">${team.score || 500}</div>
       `;
 
       teamsContainer.appendChild(div);
