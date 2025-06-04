@@ -201,6 +201,8 @@
           <li class="splide__slide"><img src="assets/imgs/tiroarco.png" alt="Tiro al arco"></li>
           <li class="splide__slide"><img src="assets/imgs/tirolata.png" alt="Tiro a la lata"></li>
           <li class="splide__slide"><img src="assets/imgs/snorkel.png" alt="Snorkel a ciegas"></li>
+          <li class="splide__slide"><img src="assets/imgs/tragabolas.png" alt="Tragabolas"></li>
+          <li class="splide__slide"><img src="assets/imgs/basket.png" alt="Basket"></li>
         </ul>
       </div>
     </div>
@@ -221,22 +223,15 @@
     speed: 600
   });
   splide.mount();
-
-  // Lista completa de pruebas (nombre y peso solo si se quiere)
-  const allTests = ['Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas'];
-
-  // Obtenemos la cola (array con nombres)
+  const allTests = ['Sombreros', 'Duelo de cartas', 'A dormir', 'Banderin', 'Sopla cartas', 'Vaso', 'Adivina', 'Bola loka', 'Pesca patos', 'Perreo', 'Pasa el aro', 'Puntos x2 en la siguiente prueba!', 'Pictionary', 'Glovaso', 'Globos', 'Tiro al arco', 'Tiro a la lata', 'Snorkel a ciegas', 'Tragabolas', 'Basket'];
   let pruebas = JSON.parse(localStorage.getItem('pruebasEnCola')) || [];
-
-  // Variable para saber si usamos cola (y la siguiente prueba a jugar)
   let usarCola = false;
   let siguientePrueba = null;
 
   if (pruebas.length > 0) {
     usarCola = true;
-    siguientePrueba = pruebas[0]; // La siguiente prueba que tiene que salir
+    siguientePrueba = pruebas[0];
   } else {
-    // Si no hay cola, usamos la lista completa
     pruebas = allTests.slice();
   }
 
@@ -251,13 +246,11 @@
   }
 
   if (usarCola) {
-    // Ojo: targetIndex es el índice en ALLTESTS, no en la cola
     let targetIndex = allTests.indexOf(siguientePrueba);
     if (targetIndex === -1) {
       alert('Error: la prueba en cola no está en la lista completa.');
       return;
     }
-
     let count = 0;
     const spins = 20 + Math.floor(Math.random() * 10);
     const interval = setInterval(() => {
@@ -267,16 +260,12 @@
         clearInterval(interval);
         const realIndex = splide.Components.Controller.toIndex(targetIndex);
         splide.go(realIndex);
-
-        // Para mostrar resultado, mostramos el nombre correcto
         mostrarResultadoPorNombre(siguientePrueba);
-
         spinBtn.style.display = 'none';
       }
     }, 80);
 
   } else {
-    // Cuando no hay cola, el índice y la lista coinciden
     let newIndex;
     do {
       newIndex = Math.floor(Math.random() * pruebas.length);
@@ -297,7 +286,6 @@
   }
 });
 
-// Nueva función para mostrar resultado por nombre (cuando usamos cola)
 function mostrarResultadoPorNombre(nombrePrueba) {
   const resultadoDiv = document.getElementById('resultado');
   const ct = document.getElementById('playContainer');
@@ -309,16 +297,14 @@ function mostrarResultadoPorNombre(nombrePrueba) {
   }
 
   if (usarCola) {
-    // Quitamos la prueba ya usada de la cola y guardamos
     pruebas.shift();
     localStorage.setItem('pruebasEnCola', JSON.stringify(pruebas));
 
     if (pruebas.length === 0) {
-      // Cuando se acabe la cola, pasamos a lista completa
       usarCola = false;
       pruebas = allTests.slice();
     } else {
-      siguientePrueba = pruebas[0]; // Actualizamos la siguiente prueba
+      siguientePrueba = pruebas[0];
     }
   }
 }
