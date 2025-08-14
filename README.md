@@ -1,4 +1,4 @@
-# 📖 Manual de uso — Oca Loka
+#  📖 Manual de uso — Oca Loka
 ## 1️⃣ Pantallas principales
 
 La aplicación cuenta con varias páginas accesibles:
